@@ -13,21 +13,26 @@ document.addEventListener("DOMContentLoaded", function () {
   obtener_calificaciones(id_libro);
   //Obtener los comentarios, actualiza la lista en el html
   obtener_comentarios(id_libro);
+  
 });
 
 //Calificar el libro
 const calificar = document.getElementById("calificar");
+const enviarComentario = document.getElementById("enviar-comentario");
 let calificado = false;
 
 calificar.addEventListener("click", function () {
   // rating se define en codigo_rating.js y tienes el número de estrellas con que se calificó al libro
-  if (rating !== 0) {
+  if (correoId !== null & rating !== 0) {
     calificaciones[rating - 1]++;
     actualizar_datos();
     calificar.disabled = true;
     calificado = true;
     guardarCalificaciones(id_libro);
-  };
+  }
+  else{
+    alert('Modo Invitado no puede calificar');
+  }
 });
 
 
@@ -138,78 +143,84 @@ function generarComentarios() {
 }
 
 function agregarComentario() {
-  const nuevoComentario = document.getElementById("nuevo-comentario").value;
+  if(correoId === null){
+    alert('Modo Invitado no puede comentar');
+  }
+  else{
 
-  if (nuevoComentario.trim() !== "") {
-    // Crear un nuevo objeto de comentario
-    const nuevoComentarioObj = {
-      IDLibro: id_libro,
-      FechaComentario: obtenerFechaActual(),
-      Email: correoId,
-      Comentario: nuevoComentario,
+    const nuevoComentario = document.getElementById("nuevo-comentario").value;
+  
+    if (nuevoComentario.trim() !== "") {
+      // Crear un nuevo objeto de comentario
+      const nuevoComentarioObj = {
+        IDLibro: id_libro,
+        FechaComentario: obtenerFechaActual(),
+        Email: correoId,
+        Comentario: nuevoComentario,
+      };
+  
+      // Agregar el nuevo comentario al principio de la lista
+      comentarios.unshift(nuevoComentarioObj);
+  
+      // Limpiar el área de comentario
+      document.getElementById("nuevo-comentario").value = "";
+  
+      // Volver a generar la lista de comentarios
+      generarComentarios();
+      // Enviar a la BD el nuevo comentario
+      guardarComentario(nuevoComentarioObj);
+    }
+    // Llamar a actualizarContador después de agregar un comentario
+    actualizarContador();
+  }
+  
+  
+  function guardarComentario(data) {
+    const url = `https://librotopia.pythonanywhere.com/guardar_comentario`;
+  
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
     };
-
-    // Agregar el nuevo comentario al principio de la lista
-    comentarios.unshift(nuevoComentarioObj);
-
-    // Limpiar el área de comentario
-    document.getElementById("nuevo-comentario").value = "";
-
-    // Volver a generar la lista de comentarios
-    generarComentarios();
-    // Enviar a la BD el nuevo comentario
-    guardarComentario(nuevoComentarioObj);
+  
+    fetch(url, options)
+      .then(response => response.json())
+      .then(function (res) {
+        alert(res.mensaje)
+      })
+      .catch(error => {
+        console.error('Error al guardar el comentario:', error);
+      });
   }
-  // Llamar a actualizarContador después de agregar un comentario
-  actualizarContador();
-}
-
-
-function guardarComentario(data) {
-  const url = `https://librotopia.pythonanywhere.com/guardar_comentario`;
-
-  const options = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-  };
-
-  fetch(url, options)
-    .then(response => response.json())
-    .then(function (res) {
-      alert(res.mensaje)
-    })
-    .catch(error => {
-      console.error('Error al guardar el comentario:', error);
-    });
-}
-
-function obtenerFechaActual() {
-  const fecha = new Date();
-  return `${fecha.getFullYear()}-${formatoDosDigitos(fecha.getMonth() + 1)}-${formatoDosDigitos(fecha.getDate())}`;
-}
-
-function formatoDosDigitos(numero) {
-  return numero < 10 ? `0${numero}` : numero;
-}
-
-function actualizarContador() {
-  const nuevoComentario = document.getElementById("nuevo-comentario");
-  const contadorCaracteres = document.getElementById("contador-caracteres");
-  const maxCaracteres = 500;
-
-  let caracteresRestantes = maxCaracteres - nuevoComentario.value.length;
-  // Ajustar el límite para permitir la escritura negativa, pero seguir mostrando el contador
-  if (caracteresRestantes < 0) {
-    caracteresRestantes = 0;
-    nuevoComentario.value = nuevoComentario.value.slice(0, maxCaracteres); // Limitar la longitud del texto
+  
+  function obtenerFechaActual() {
+    const fecha = new Date();
+    return `${fecha.getFullYear()}-${formatoDosDigitos(fecha.getMonth() + 1)}-${formatoDosDigitos(fecha.getDate())}`;
   }
-  contadorCaracteres.textContent = `${caracteresRestantes} caracteres restantes`;
-
-  contadorCaracteres.style.color = caracteresRestantes == 0 ? "red" : "";
-}
+  
+  function formatoDosDigitos(numero) {
+    return numero < 10 ? `0${numero}` : numero;
+  }
+  
+  function actualizarContador() {
+    const nuevoComentario = document.getElementById("nuevo-comentario");
+    const contadorCaracteres = document.getElementById("contador-caracteres");
+    const maxCaracteres = 500;
+  
+    let caracteresRestantes = maxCaracteres - nuevoComentario.value.length;
+    // Ajustar el límite para permitir la escritura negativa, pero seguir mostrando el contador
+    if (caracteresRestantes < 0) {
+      caracteresRestantes = 0;
+      nuevoComentario.value = nuevoComentario.value.slice(0, maxCaracteres); // Limitar la longitud del texto
+    }
+    contadorCaracteres.textContent = `${caracteresRestantes} caracteres restantes`;
+  
+    contadorCaracteres.style.color = caracteresRestantes == 0 ? "red" : "";
+  }
+  }
 
 
 // ============================================= rating ====================================================

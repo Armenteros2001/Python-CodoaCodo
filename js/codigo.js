@@ -41,7 +41,30 @@ modoDN.addEventListener('click', function () {
   cambiarDiaNoche();
 });
 
-//**************************************Guardar a Fvaoritos****************************************
+//falta darle estilo al boton cerrar sesion que lo puse en otro div
+//aca verifico si hay una sesion iniciada y si es asi creo el boton cerrar sesion 
+//y oculto el iniciar sesion. Ademas de la funcionalidad al cerrar la sesion.
+document.addEventListener("DOMContentLoaded", function () {
+  const email = localStorage.getItem('email');
+
+  if (email != null) {
+    const contenedorBotonCerrarSesion = document.getElementById('boton-cerrar-sesion-container');
+    // Obtén el elemento del enlace "Iniciar Sesión" por su id
+    const enlaceIniciarSesion = document.getElementById('iniciarSesion');
+    // Oculta el enlace
+    enlaceIniciarSesion.style.display = 'none';
+
+    const botonCerrarSesion = document.createElement('button');
+    botonCerrarSesion.textContent = 'Cerrar Sesión';
+    botonCerrarSesion.addEventListener('click', function () {
+      // Limpiar el localStorage al cerrar sesión
+      localStorage.removeItem('email');
+      // Redirigir a la página de inicio de sesión o a la página principal
+      location.reload();
+    });
+    contenedorBotonCerrarSesion.appendChild(botonCerrarSesion);
+  }
+});
 
 
 //**************************************Validad claves iguales en el registro****************************************
@@ -69,7 +92,7 @@ function nuevaCuenta() {
 
   const correo = document.getElementById("correo").value;
   const contraseña = document.getElementById("password1").value;
-  const url = 'https://librotopia.pythonanywhere.com/registrar_cliente';
+  const url = 'http://127.0.0.1:5000/registrar_cliente';
 
   const data = {
     email: correo,
@@ -103,7 +126,7 @@ function inicioSesion() {
   const correo = document.getElementById("email");
   const contraseña = document.getElementById("password");
 
-  const url = 'https://librotopia.pythonanywhere.com/verificar_cliente';
+  const url = 'http://127.0.0.1:5000/verificar_cliente';
 
   const data = {
     email: correo.value,

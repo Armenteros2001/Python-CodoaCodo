@@ -9,6 +9,15 @@ let generosSeleccionados = urlParametros.get("generos").split(",");
 // Indices para mover la cinta de portada de cada género.
 const generosIndices = {};
 
+const modo = urlParametros.get('modo');
+
+//aca obtenemos el modo invitado de la URL para bloquear el btn de panel de usuario
+if(modo === 'invitado'){
+  const panelUsuarioButton = document.getElementById('panelUsuario');
+  if(panelUsuarioButton){
+    panelUsuarioButton.style.display = 'none';
+  }
+}
 
 // Barra de progreso
 const carga = document.getElementById('carga');
@@ -24,7 +33,7 @@ barraDeProgreso.style.width = progreso + '%';
 // Recorrer arreglo de géneros selecionados
 generosSeleccionados.forEach(genero => {
   // Crear la URL de la API basada en el género actual
-  const apiUrl = `https://librotopia.pythonanywhere.com/libros/${genero}`;
+  const apiUrl = `http://127.0.0.1:5000/libros/${genero}`;
 
   // Arreglo para almacenar los libros del género actual
   const librosGenero = [];
